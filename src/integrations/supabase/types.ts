@@ -141,6 +141,51 @@ export type Database = {
         }
         Relationships: []
       }
+      repair_requests: {
+        Row: {
+          brand: string | null
+          created_at: string | null
+          device_type: string
+          estimated_cost: string | null
+          id: string
+          issue_description: string
+          model: string | null
+          notes: string | null
+          status: string | null
+          updated_at: string | null
+          urgency_level: string | null
+          user_id: string | null
+        }
+        Insert: {
+          brand?: string | null
+          created_at?: string | null
+          device_type: string
+          estimated_cost?: string | null
+          id?: string
+          issue_description: string
+          model?: string | null
+          notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+          urgency_level?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          brand?: string | null
+          created_at?: string | null
+          device_type?: string
+          estimated_cost?: string | null
+          id?: string
+          issue_description?: string
+          model?: string | null
+          notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+          urgency_level?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           category: string
