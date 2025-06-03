@@ -4,9 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 
 const Team = () => {
   const [teamMembers, setTeamMembers] = useState([]);
+  const [userProfiles, setUserProfiles] = useState([]);
 
   useEffect(() => {
     fetchTeamMembers();
+    fetchUserProfiles();
   }, []);
 
   const fetchTeamMembers = async () => {
@@ -25,6 +27,27 @@ const Team = () => {
     }
   };
 
+  const fetchUserProfiles = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('is_ceo', true);
+
+      if (data) {
+        setUserProfiles(data);
+      }
+    } catch (error) {
+      console.error('Error fetching user profiles:', error);
+    }
+  };
+
+  const handleWhatsAppClick = (phoneNumber) => {
+    const cleanNumber = phoneNumber.replace(/\D/g, '');
+    const whatsappUrl = `https://wa.me/${cleanNumber.startsWith('254') ? cleanNumber : '254' + cleanNumber.substring(1)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   return (
     <section className="team" id="team">
       <div className="container">
@@ -32,6 +55,36 @@ const Team = () => {
         <p className="section-subtitle">Dedicated professionals committed to excellence</p>
         
         <div className="team-grid">
+          {/* CEO Profile from user_profiles */}
+          {userProfiles.map((profile) => (
+            <div key={profile.id} className="team-card">
+              <img src="/placeholder.svg" alt={profile.full_name} />
+              <div className="card-content">
+                <h3>{profile.full_name}</h3>
+                <p className="position">{profile.position}</p>
+                <p className="bio">{profile.bio}</p>
+
+                <div className="social-links">
+                  {profile.whatsapp_number && (
+                    <button
+                      onClick={() => handleWhatsAppClick(profile.whatsapp_number)}
+                      className="whatsapp-btn"
+                      title="Contact via WhatsApp"
+                    >
+                      <i className="fab fa-whatsapp"></i>
+                    </button>
+                  )}
+                  {profile.linkedin_url && (
+                    <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer">
+                      <i className="fab fa-linkedin"></i>
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* Regular team members */}
           {teamMembers.map((member) => (
             <div key={member.id} className="team-card">
               <img src={member.image_url} alt={member.name} />

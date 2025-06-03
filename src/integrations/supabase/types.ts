@@ -186,6 +186,47 @@ export type Database = {
         }
         Relationships: []
       }
+      service_details: {
+        Row: {
+          benefits: string[] | null
+          created_at: string | null
+          detailed_description: string
+          external_resources: string[] | null
+          faq: Json | null
+          id: string
+          process_steps: string[] | null
+          service_id: string | null
+        }
+        Insert: {
+          benefits?: string[] | null
+          created_at?: string | null
+          detailed_description: string
+          external_resources?: string[] | null
+          faq?: Json | null
+          id?: string
+          process_steps?: string[] | null
+          service_id?: string | null
+        }
+        Update: {
+          benefits?: string[] | null
+          created_at?: string | null
+          detailed_description?: string
+          external_resources?: string[] | null
+          faq?: Json | null
+          id?: string
+          process_steps?: string[] | null
+          service_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_details_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           category: string
@@ -267,6 +308,45 @@ export type Database = {
           position?: string
           specialties?: string[] | null
           twitter_url?: string | null
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          bio: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          is_ceo: boolean | null
+          linkedin_url: string | null
+          position: string | null
+          updated_at: string | null
+          user_id: string | null
+          whatsapp_number: string | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          is_ceo?: boolean | null
+          linkedin_url?: string | null
+          position?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          whatsapp_number?: string | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          is_ceo?: boolean | null
+          linkedin_url?: string | null
+          position?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          whatsapp_number?: string | null
         }
         Relationships: []
       }

@@ -12,7 +12,9 @@ const Index = () => {
       <nav className="navbar">
         <div className="nav-container">
           <div className="nav-logo">
-            <h2>Zedekiah Tech Clinic</h2>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#ffffff', margin: 0 }}>
+              Zedekiah Tech Clinic
+            </h2>
           </div>
           <ul className="nav-menu">
             <li><a href="#home" className="nav-link">Home</a></li>
