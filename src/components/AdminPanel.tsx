@@ -1,12 +1,21 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
+
+interface AnalyticsData {
+  total_messages?: number;
+  new_messages?: number;
+  today_messages?: number;
+  total_blog_posts?: number;
+  active_services?: number;
+  active_team_members?: number;
+}
 
 const AdminPanel = () => {
   const [messages, setMessages] = useState([]);
   const [repairRequests, setRepairRequests] = useState([]);
-  const [analytics, setAnalytics] = useState({});
+  const [analytics, setAnalytics] = useState<AnalyticsData>({});
   const [activeTab, setActiveTab] = useState('messages');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');

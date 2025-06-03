@@ -114,7 +114,7 @@ const Contact = () => {
           <textarea
             name="message"
             placeholder="Describe your tech needs..."
-            rows="5"
+            rows={5}
             value={formData.message}
             onChange={handleChange}
             required
