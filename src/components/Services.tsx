@@ -1,13 +1,19 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+
+interface ServiceDetail {
+  detailed_description: string;
+  process_steps?: string[];
+  benefits?: string[];
+  faq?: Record<string, string>;
+}
 
 const Services = () => {
   const [services, setServices] = useState([]);
   const [activeFilter, setActiveFilter] = useState('all');
   const [selectedService, setSelectedService] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [serviceDetails, setServiceDetails] = useState(null);
+  const [serviceDetails, setServiceDetails] = useState<ServiceDetail | null>(null);
 
   useEffect(() => {
     fetchServices();
@@ -41,7 +47,7 @@ const Services = () => {
         setServiceDetails(data);
       } else {
         // If no details exist, create mock data and search Google
-        const mockDetails = {
+        const mockDetails: ServiceDetail = {
           detailed_description: `Comprehensive ${selectedService?.title} service with professional expertise and quality assurance.`,
           process_steps: [
             'Initial consultation and assessment',
