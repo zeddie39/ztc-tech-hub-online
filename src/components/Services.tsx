@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -5,7 +6,7 @@ interface ServiceDetail {
   detailed_description: string;
   process_steps?: string[];
   benefits?: string[];
-  faq?: Record<string, string>;
+  faq?: any; // Changed from Record<string, string> to any to handle Json type
 }
 
 const Services = () => {
@@ -197,10 +198,10 @@ const Services = () => {
                   {serviceDetails.faq && (
                     <div className="detail-section">
                       <h3>Frequently Asked Questions</h3>
-                      {Object.entries(serviceDetails.faq).map(([question, answer], index) => (
+                      {typeof serviceDetails.faq === 'object' && Object.entries(serviceDetails.faq).map(([question, answer], index) => (
                         <div key={index} className="faq-item">
                           <h4>{question}</h4>
-                          <p>{answer}</p>
+                          <p>{String(answer)}</p>
                         </div>
                       ))}
                     </div>
