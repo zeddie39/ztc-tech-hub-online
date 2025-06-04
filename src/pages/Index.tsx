@@ -5,6 +5,7 @@ import Services from '@/components/Services';
 import Team from '@/components/Team';
 import Blog from '@/components/Blog';
 import Contact from '@/components/Contact';
+import { Link } from 'react-router-dom';
 
 const Index = () => {
   return (
@@ -22,7 +23,7 @@ const Index = () => {
             <li><a href="#team" className="nav-link">Team</a></li>
             <li><a href="#blog" className="nav-link">Blog</a></li>
             <li><a href="#contact" className="nav-link">Contact</a></li>
-            <li><a href="/admin" className="nav-link btn-login">Admin</a></li>
+            <li><Link to="/admin" className="nav-link btn-login">Admin</Link></li>
           </ul>
           <div className="hamburger">
             <span></span>

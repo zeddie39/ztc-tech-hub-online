@@ -19,14 +19,23 @@ const AdminAuth = ({ onAuthSuccess }: AdminAuthProps) => {
     setLoading(true);
     setError('');
 
+    console.log('Attempting authentication:', { isLogin, email });
+
     try {
       if (isLogin) {
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
+        
+        console.log('Login result:', { data, error });
+        
         if (error) throw error;
-        onAuthSuccess(data.user);
+        
+        if (data.user) {
+          console.log('Login successful, user:', data.user.email);
+          onAuthSuccess(data.user);
+        }
       } else {
         // Sign up new admin user
         const { data, error } = await supabase.auth.signUp({
@@ -39,10 +48,13 @@ const AdminAuth = ({ onAuthSuccess }: AdminAuthProps) => {
             }
           }
         });
+        
+        console.log('Signup result:', { data, error });
+        
         if (error) throw error;
         
         // Create admin user record
-        if (data.user) {
+        if (data.user && data.user.email_confirmed_at) {
           const { error: adminError } = await supabase
             .from('admin_users')
             .insert({
@@ -56,12 +68,15 @@ const AdminAuth = ({ onAuthSuccess }: AdminAuthProps) => {
           if (adminError) {
             console.error('Error creating admin record:', adminError);
           }
+          
+          onAuthSuccess(data.user);
+        } else {
+          setError('Account created successfully! Please check your email to verify your account, then try logging in.');
+          setIsLogin(true);
         }
-        
-        setError('Account created successfully! Please check your email to verify your account.');
-        setIsLogin(true);
       }
     } catch (error: any) {
+      console.error('Auth error:', error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -71,9 +86,14 @@ const AdminAuth = ({ onAuthSuccess }: AdminAuthProps) => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 to-blue-900">
       <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6">
-          {isLogin ? 'Admin Login' : 'Create Admin Account'}
-        </h2>
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">
+            {isLogin ? 'Admin Login' : 'Create Admin Account'}
+          </h2>
+          <p className="text-gray-600 mt-2">
+            {isLogin ? 'Sign in to access the admin panel' : 'Create a new admin account'}
+          </p>
+        </div>
         
         <form onSubmit={handleAuth} className="space-y-4">
           {!isLogin && (
@@ -87,6 +107,7 @@ const AdminAuth = ({ onAuthSuccess }: AdminAuthProps) => {
                 onChange={(e) => setFullName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
+                placeholder="Enter your full name"
               />
             </div>
           )}
@@ -101,6 +122,7 @@ const AdminAuth = ({ onAuthSuccess }: AdminAuthProps) => {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
+              placeholder="Enter your email"
             />
           </div>
           
@@ -114,6 +136,8 @@ const AdminAuth = ({ onAuthSuccess }: AdminAuthProps) => {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
+              placeholder="Enter your password"
+              minLength={6}
             />
           </div>
           
@@ -130,7 +154,7 @@ const AdminAuth = ({ onAuthSuccess }: AdminAuthProps) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {loading ? 'Processing...' : (isLogin ? 'Login' : 'Create Account')}
           </button>
@@ -138,11 +162,18 @@ const AdminAuth = ({ onAuthSuccess }: AdminAuthProps) => {
         
         <div className="mt-4 text-center">
           <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-blue-600 hover:underline"
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setError('');
+            }}
+            className="text-blue-600 hover:underline text-sm"
           >
-            {isLogin ? 'Create new admin account' : 'Back to login'}
+            {isLogin ? 'Need to create an admin account?' : 'Already have an account? Sign in'}
           </button>
+        </div>
+        
+        <div className="mt-6 text-xs text-gray-500 text-center">
+          <p>🔒 Secure admin access only</p>
         </div>
       </div>
     </div>
