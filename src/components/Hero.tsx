@@ -11,18 +11,33 @@ const Hero = () => {
 
   const fetchDailyQuote = async () => {
     try {
+      // Get a rotating quote based on the day of the year
+      const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24);
+      
       const { data, error } = await supabase
         .from('daily_quotes')
         .select('*')
         .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1);
+        .order('created_at', { ascending: false });
 
       if (data && data.length > 0) {
-        setQuote(data[0]);
+        // Use modulo to cycle through quotes based on day of year
+        const quoteIndex = dayOfYear % data.length;
+        setQuote(data[quoteIndex]);
+      } else {
+        // Fallback quote
+        setQuote({
+          quote_text: 'Regular maintenance extends device lifespan by up to 40%',
+          author: 'ZTC Team'
+        });
       }
     } catch (error) {
       console.error('Error fetching daily quote:', error);
+      // Fallback quote
+      setQuote({
+        quote_text: 'Quality repair work is an investment in your technology\'s future',
+        author: 'ZTC Experts'
+      });
     }
   };
 
@@ -38,10 +53,10 @@ const Hero = () => {
         </div>
         
         <div className="daily-quote">
-          <h4>💡 Tech Tip of the Day</h4>
+          <h4>💡 Tech Insight of the Day</h4>
           <blockquote>
-            "{quote.quote_text || 'Regular maintenance extends device lifespan by up to 40%'}"
-            <cite>- {quote.author || 'ZTC Team'}</cite>
+            "{quote.quote_text}"
+            <cite>- {quote.author}</cite>
           </blockquote>
         </div>
 
