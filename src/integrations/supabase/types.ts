@@ -141,6 +141,104 @@ export type Database = {
         }
         Relationships: []
       }
+      orders: {
+        Row: {
+          buyer_id: string | null
+          created_at: string | null
+          id: string
+          product_id: string | null
+          seller_id: string | null
+          shipping_address: Json | null
+          status: string | null
+          total_amount: number
+          updated_at: string | null
+        }
+        Insert: {
+          buyer_id?: string | null
+          created_at?: string | null
+          id?: string
+          product_id?: string | null
+          seller_id?: string | null
+          shipping_address?: Json | null
+          status?: string | null
+          total_amount: number
+          updated_at?: string | null
+        }
+        Update: {
+          buyer_id?: string | null
+          created_at?: string | null
+          id?: string
+          product_id?: string | null
+          seller_id?: string | null
+          shipping_address?: Json | null
+          status?: string | null
+          total_amount?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          brand: string | null
+          category: string
+          condition: string
+          created_at: string | null
+          description: string
+          id: string
+          images: Json | null
+          is_active: boolean | null
+          is_sold: boolean | null
+          model: string | null
+          price: number
+          specifications: Json | null
+          title: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          brand?: string | null
+          category: string
+          condition?: string
+          created_at?: string | null
+          description: string
+          id?: string
+          images?: Json | null
+          is_active?: boolean | null
+          is_sold?: boolean | null
+          model?: string | null
+          price: number
+          specifications?: Json | null
+          title: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          brand?: string | null
+          category?: string
+          condition?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          images?: Json | null
+          is_active?: boolean | null
+          is_sold?: boolean | null
+          model?: string | null
+          price?: number
+          specifications?: Json | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       repair_requests: {
         Row: {
           brand: string | null
