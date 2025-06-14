@@ -4,55 +4,49 @@ import { supabase } from '@/integrations/supabase/client';
 import AdminAuth from '@/components/auth/AdminAuth';
 import AdminDashboard from '@/components/admin/AdminDashboard';
 
+// Add: helper for logging state transitions
+const debug = (...args: any[]) => console.log('[Admin debug]', ...args);
+
 const Admin = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
-    console.log('Admin page mounted, checking session...');
+    debug('Admin page mounted, initializing session and auth state listener...');
     
-    // Check for existing session
-    const checkSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        console.log('Session check result:', { session, error });
-        
-        if (error) {
-          console.error('Session error:', error);
-          setError(error.message);
-        }
-        
-        setUser(session?.user || null);
-      } catch (err) {
-        console.error('Error checking session:', err);
-        setError('Failed to check authentication status');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkSession();
-
-    // Listen for auth changes
+    // Listen for auth changes first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
+        debug('Auth state change event:', event, session);
         setUser(session?.user || null);
         setError('');
       }
     );
 
-    return () => subscription.unsubscribe();
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      debug('Initial session check result:', { session, error });
+      if (error) {
+        setError(error.message);
+      }
+      setUser(session?.user || null);
+      setLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      debug('Cleaned up auth subscription.');
+    };
   }, []);
 
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
       setUser(null);
-      console.log('User logged out successfully');
+      debug('User logged out successfully');
     } catch (error) {
-      console.error('Logout error:', error);
+      debug('Logout error:', error);
     }
   };
 
@@ -68,6 +62,7 @@ const Admin = () => {
   }
 
   if (error) {
+    debug('Displaying error:', error);
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center p-8 bg-white rounded-lg shadow-md">
@@ -84,11 +79,15 @@ const Admin = () => {
     );
   }
 
+  // If not authenticated, show login prompt (do NOT redirect to /)
   if (!user) {
+    debug('User not authenticated, showing AdminAuth prompt');
     return <AdminAuth onAuthSuccess={setUser} />;
   }
 
+  debug('Authenticated as user', user);
   return <AdminDashboard user={user} onLogout={handleLogout} />;
 };
 
 export default Admin;
+
