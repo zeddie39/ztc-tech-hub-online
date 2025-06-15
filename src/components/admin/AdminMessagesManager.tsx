@@ -1,12 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Trash2, Eye, Mail, Phone } from 'lucide-react';
+import { Trash2, Mail, Phone } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const AdminMessagesManager = () => {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchMessages();
@@ -45,7 +47,7 @@ const AdminMessagesManager = () => {
   };
 
   const deleteMessage = async (id: string) => {
-    if (confirm('Are you sure you want to delete this message?')) {
+    if (window.confirm('Are you sure you want to delete this message?')) {
       try {
         const { error } = await supabase
           .from('contact_messages')
@@ -61,9 +63,19 @@ const AdminMessagesManager = () => {
     }
   };
 
-  const filteredMessages = messages.filter(msg => 
-    filter === 'all' || msg.status === filter
-  );
+  const filteredMessages = messages.filter(msg => {
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch =
+      !searchTerm ||
+      (msg.first_name && msg.first_name.toLowerCase().includes(searchLower)) ||
+      (msg.last_name && msg.last_name.toLowerCase().includes(searchLower)) ||
+      (msg.email && msg.email.toLowerCase().includes(searchLower)) ||
+      (msg.message && msg.message.toLowerCase().includes(searchLower));
+
+    const matchesFilter = filter === 'all' || msg.status === filter;
+
+    return matchesSearch && matchesFilter;
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -80,18 +92,27 @@ const AdminMessagesManager = () => {
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 gap-4">
         <h2 className="text-2xl font-bold text-gray-900">Contact Messages</h2>
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="px-4 py-2 border rounded-lg"
-        >
-          <option value="all">All Messages</option>
-          <option value="new">New</option>
-          <option value="in-progress">In Progress</option>
-          <option value="resolved">Resolved</option>
-        </select>
+        <div className="flex items-center gap-2">
+          <Input
+            placeholder="Search messages..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-64"
+          />
+          <Select value={filter} onValueChange={setFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="new">New</SelectItem>
+              <SelectItem value="in-progress">In Progress</SelectItem>
+              <SelectItem value="resolved">Resolved</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="space-y-4">

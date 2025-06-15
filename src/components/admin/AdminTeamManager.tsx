@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Trash2, Edit, Plus, Save, X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 const AdminTeamManager = () => {
-  const [teamMembers, setTeamMembers] = useState([]);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingMember, setEditingMember] = useState<any>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -18,6 +18,7 @@ const AdminTeamManager = () => {
     github_url: '',
     specialties: '',
   });
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchTeamMembers();
@@ -56,7 +57,7 @@ const AdminTeamManager = () => {
   };
 
   const deleteMember = async (id: string) => {
-    if (confirm('Are you sure you want to delete this team member?')) {
+    if (window.confirm('Are you sure you want to delete this team member?')) {
       try {
         const { error } = await supabase
           .from('team_members')
@@ -73,6 +74,7 @@ const AdminTeamManager = () => {
   };
 
   const updateMember = async () => {
+    if (!editingMember) return;
     try {
       const { error } = await supabase
         .from('team_members')
@@ -121,6 +123,15 @@ const AdminTeamManager = () => {
     }
   };
 
+  const filteredMembers = teamMembers.filter(member => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      !searchTerm ||
+      (member.name && member.name.toLowerCase().includes(searchLower)) ||
+      (member.position && member.position.toLowerCase().includes(searchLower))
+    );
+  });
+
   if (loading) {
     return <div className="p-6">Loading team members...</div>;
   }
@@ -129,13 +140,21 @@ const AdminTeamManager = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Team Members</h2>
-        <button
-          onClick={() => setShowAddForm(true)}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Member
-        </button>
+        <div className="flex items-center gap-4">
+          <Input
+            placeholder="Search by name or position..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-64"
+          />
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Member
+          </button>
+        </div>
       </div>
 
       {showAddForm && (
@@ -196,7 +215,7 @@ const AdminTeamManager = () => {
       )}
 
       <div className="space-y-4">
-        {teamMembers.map((member: any) => (
+        {filteredMembers.map((member: any) => (
           <div key={member.id} className="bg-white border rounded-lg p-4 shadow-sm">
             {editingMember?.id === member.id ? (
               <div className="grid grid-cols-2 gap-4">

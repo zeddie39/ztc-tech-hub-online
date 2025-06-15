@@ -1,12 +1,15 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Trash2, Edit, CheckCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const AdminRequestsManager = () => {
-  const [requests, setRequests] = useState([]);
+  const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingCost, setEditingCost] = useState<{id: string, cost: string} | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
     fetchRequests();
@@ -61,7 +64,7 @@ const AdminRequestsManager = () => {
   };
 
   const deleteRequest = async (id: string) => {
-    if (confirm('Are you sure you want to delete this repair request?')) {
+    if (window.confirm('Are you sure you want to delete this repair request?')) {
       try {
         const { error } = await supabase
           .from('repair_requests')
@@ -87,16 +90,52 @@ const AdminRequestsManager = () => {
     }
   };
 
+  const filteredRequests = requests.filter(req => {
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch =
+      !searchTerm ||
+      (req.device_type && req.device_type.toLowerCase().includes(searchLower)) ||
+      (req.brand && req.brand.toLowerCase().includes(searchLower)) ||
+      (req.model && req.model.toLowerCase().includes(searchLower)) ||
+      (req.issue_description && req.issue_description.toLowerCase().includes(searchLower));
+
+    const matchesFilter = statusFilter === 'all' || req.status === statusFilter;
+
+    return matchesSearch && matchesFilter;
+  });
+
   if (loading) {
     return <div className="p-6">Loading repair requests...</div>;
   }
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Repair Requests</h2>
+      <div className="flex justify-between items-center mb-6 gap-4">
+        <h2 className="text-2xl font-bold text-gray-900">Repair Requests</h2>
+        <div className="flex items-center gap-2">
+          <Input
+            placeholder="Search requests..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-64"
+          />
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="in_progress">In Progress</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
       <div className="space-y-4">
-        {requests.map((request: any) => (
+        {filteredRequests.map((request: any) => (
           <div key={request.id} className="bg-white border rounded-lg p-4 shadow-sm">
             <div className="flex justify-between items-start mb-3">
               <div>

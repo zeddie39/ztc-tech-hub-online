@@ -1,12 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Trash2, Edit, Save, X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 const AdminUsersManager = () => {
-  const [userProfiles, setUserProfiles] = useState([]);
+  const [userProfiles, setUserProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingProfile, setEditingProfile] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchUserProfiles();
@@ -30,10 +31,11 @@ const AdminUsersManager = () => {
   };
 
   const updateProfile = async () => {
+    if (!editingProfile) return;
     try {
       const { error } = await supabase
         .from('user_profiles')
-        .update(editingProfile)
+        .update({ ...editingProfile, updated_at: new Date().toISOString() })
         .eq('id', editingProfile.id);
 
       if (!error) {
@@ -46,7 +48,7 @@ const AdminUsersManager = () => {
   };
 
   const deleteProfile = async (id: string) => {
-    if (confirm('Are you sure you want to delete this user profile?')) {
+    if (window.confirm('Are you sure you want to delete this user profile?')) {
       try {
         const { error } = await supabase
           .from('user_profiles')
@@ -62,16 +64,33 @@ const AdminUsersManager = () => {
     }
   };
 
+  const filteredProfiles = userProfiles.filter(profile => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      !searchTerm ||
+      (profile.full_name && profile.full_name.toLowerCase().includes(searchLower)) ||
+      (profile.position && profile.position.toLowerCase().includes(searchLower))
+    );
+  });
+
   if (loading) {
     return <div className="p-6">Loading user profiles...</div>;
   }
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">User Profiles</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">User Profiles</h2>
+        <Input
+          placeholder="Search by name or position..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-64"
+        />
+      </div>
 
       <div className="space-y-4">
-        {userProfiles.map((profile: any) => (
+        {filteredProfiles.map((profile: any) => (
           <div key={profile.id} className="bg-white border rounded-lg p-4 shadow-sm">
             {editingProfile?.id === profile.id ? (
               <div className="grid grid-cols-2 gap-4">
